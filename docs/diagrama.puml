@@ -1,0 +1,63 @@
+@startuml
+title Sistema de Domótica - Diagrama General
+
+actor Usuario
+actor Alexa
+
+package "Consola de Control" {
+  [App Móvil]
+}
+
+package "Sensores" {
+  [Sensor de Temperatura]
+  [Sensor de Humedad]
+  [Sensor de Movimiento]
+  [Sensor de Puerta/Ventana]
+}
+
+package "Actuadores y Dispositivos" {
+  [Luces de Habitación]
+  [Luces LED]
+  [Aire Acondicionado]
+  [Ventanas Automáticas]
+  [Cortinas Automáticas]
+  [Puerta de Corral]
+  [Bocinas Inteligentes]
+  [Sistema de Riego]
+  [Alarma Inteligente]
+  [Cámara de Seguridad]
+}
+
+Usuario --> [App Móvil] : Control manual
+Usuario --> Alexa : Comandos de voz
+
+[App Móvil] --> [Luces de Habitación] : Encender/Apagar
+[App Móvil] --> [Luces LED] : Encender/Apagar/Colores
+[App Móvil] --> [Aire Acondicionado] : Encender/Apagar/Temperatura
+[App Móvil] --> [Ventanas Automáticas] : Abrir/Cerrar
+[App Móvil] --> [Cortinas Automáticas] : Abrir/Cerrar
+[App Móvil] --> [Puerta de Corral] : Abrir/Cerrar
+[App Móvil] --> [Bocinas Inteligentes] : Reproducir música
+[App Móvil] --> [Sistema de Riego] : Activar/Desactivar
+[App Móvil] --> [Alarma Inteligente] : Activar/Desactivar
+[App Móvil] --> [Cámara de Seguridad] : Visualizar
+
+Alexa --> [Luces de Habitación]
+Alexa --> [Luces LED]
+Alexa --> [Aire Acondicionado]
+Alexa --> [Ventanas Automáticas]
+Alexa --> [Cortinas Automáticas]
+Alexa --> [Puerta de Corral]
+Alexa --> [Bocinas Inteligentes]
+Alexa --> [Sistema de Riego]
+Alexa --> [Alarma Inteligente]
+
+[Sensor de Temperatura] --> [Aire Acondicionado] : Ajuste automático
+[Sensor de Humedad] --> [Sistema de Riego] : Activar si seco
+[Sensor de Humedad] --> [Ventanas Automáticas] : Cerrar si llueve
+[Sensor de Movimiento] --> [Alarma Inteligente] : Activar alerta
+[Sensor de Puerta/Ventana] --> [Alarma Inteligente] : Activar alerta
+
+[Alarma Inteligente] --> [Bocinas Inteligentes] : Emitir alerta sonora
+
+@enduml
