@@ -1,63 +1,91 @@
 @startuml
-title Sistema de Domótica - Diagrama General
+title Sistema Domótico Hogar - Diagrama General
 
-actor Usuario
-actor Alexa
+' Actores
+actor Usuario #LightBlue
+actor Alexa #LightBlue
 
-package "Consola de Control" {
-  [App Móvil]
+' Consola y Hub
+rectangle "Consola de Control" as ConsolaControl #MintCream
+rectangle "Hub Domótico" as Hub #Wheat
+
+' Agrupación de sensores
+package "Sensores" #AliceBlue {
+  [SensorTemp] as ST
+  [SensorHumedad] as SH
+  [SensorMovimiento] as SM
+  [SensorPuerta] as SP
 }
 
-package "Sensores" {
-  [Sensor de Temperatura]
-  [Sensor de Humedad]
-  [Sensor de Movimiento]
-  [Sensor de Puerta/Ventana]
+' Habitaciones y dispositivos
+package "Habitación" #MistyRose {
+  [LuzHabitacion] as LH
+  [LuzLed] as LL
+  [Ventilador] as V
+  [Bocina] as B
 }
 
-package "Actuadores y Dispositivos" {
-  [Luces de Habitación]
-  [Luces LED]
-  [Aire Acondicionado]
-  [Ventanas Automáticas]
-  [Cortinas Automáticas]
-  [Puerta de Corral]
-  [Bocinas Inteligentes]
-  [Sistema de Riego]
-  [Alarma Inteligente]
-  [Cámara de Seguridad]
+package "Ventanas" #HoneyDew {
+  [VentanaAuto] as VA
+  [CortinaAuto] as CA
 }
 
-Usuario --> [App Móvil] : Control manual
-Usuario --> Alexa : Comandos de voz
+package "Pasillo" #Lavender {
+  [LuzPasillo] as LP
+  [Enchufe] as E
+}
 
-[App Móvil] --> [Luces de Habitación] : Encender/Apagar
-[App Móvil] --> [Luces LED] : Encender/Apagar/Colores
-[App Móvil] --> [Aire Acondicionado] : Encender/Apagar/Temperatura
-[App Móvil] --> [Ventanas Automáticas] : Abrir/Cerrar
-[App Móvil] --> [Cortinas Automáticas] : Abrir/Cerrar
-[App Móvil] --> [Puerta de Corral] : Abrir/Cerrar
-[App Móvil] --> [Bocinas Inteligentes] : Reproducir música
-[App Móvil] --> [Sistema de Riego] : Activar/Desactivar
-[App Móvil] --> [Alarma Inteligente] : Activar/Desactivar
-[App Móvil] --> [Cámara de Seguridad] : Visualizar
+package "Seguridad" #Seashell {
+  [Puerta] as P
+  [Alarma] as A
+  [Camara] as C
+}
 
-Alexa --> [Luces de Habitación]
-Alexa --> [Luces LED]
-Alexa --> [Aire Acondicionado]
-Alexa --> [Ventanas Automáticas]
-Alexa --> [Cortinas Automáticas]
-Alexa --> [Puerta de Corral]
-Alexa --> [Bocinas Inteligentes]
-Alexa --> [Sistema de Riego]
-Alexa --> [Alarma Inteligente]
+' Relaciones de control
+Usuario -[#DarkGreen]> ConsolaControl : Control manual
+Usuario -[#RoyalBlue]> Alexa : Comandos de voz
 
-[Sensor de Temperatura] --> [Aire Acondicionado] : Ajuste automático
-[Sensor de Humedad] --> [Sistema de Riego] : Activar si seco
-[Sensor de Humedad] --> [Ventanas Automáticas] : Cerrar si llueve
-[Sensor de Movimiento] --> [Alarma Inteligente] : Activar alerta
-[Sensor de Puerta/Ventana] --> [Alarma Inteligente] : Activar alerta
+ConsolaControl -[#DarkOrange]> Hub : Enviar comandos
+Alexa -[#RoyalBlue]> Hub : Comandos de voz
 
-[Alarma Inteligente] --> [Bocinas Inteligentes] : Emitir alerta sonora
+' El Hub controla todos los dispositivos
+Hub -[#DarkSlateGray]> LH
+Hub -[#DarkSlateGray]> LL
+Hub -[#DarkSlateGray]> V
+Hub -[#DarkSlateGray]> B
+Hub -[#DarkSlateGray]> VA
+Hub -[#DarkSlateGray]> CA
+Hub -[#DarkSlateGray]> LP
+Hub -[#DarkSlateGray]> E
+Hub -[#DarkSlateGray]> P
+Hub -[#DarkSlateGray]> A
+Hub -[#DarkSlateGray]> C
+
+' Sensores informan al Hub
+ST -[#FireBrick]-> Hub : Notifica temperatura
+SH -[#FireBrick]-> Hub : Notifica humedad
+SM -[#FireBrick]-> Hub : Notifica movimiento
+SP -[#FireBrick]-> Hub : Notifica apertura
+
+' Automatización y seguridad
+Hub -[#Purple]> V : Ajuste automático
+Hub -[#Red]> A : Activar alerta
+A -[#Red]> B : Alerta sonora
+A -[#Red]> C : Activar grabación
+
+' Notas aclaratorias
+note right of Usuario
+  Usuario puede controlar manualmente
+  o por voz (Alexa)
+end note
+
+note right of Hub
+  El Hub centraliza la lógica,
+  recibe eventos y ejecuta acciones
+end note
+
+note bottom of A
+  Alarma puede activar bocina y cámara
+end note
 
 @enduml
