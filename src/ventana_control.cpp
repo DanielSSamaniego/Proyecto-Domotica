@@ -389,16 +389,19 @@ void VentanaControl::mostrarMenuCochera() {
     connect(btnRegresar, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCuadricula);
 }
 
-void VentanaControl::manejarBotonLucesCochera() {
-    lucesCocheraEncendidas = !lucesCocheraEncendidas;
-    if (lucesCocheraEncendidas) {
-        enviarComandoArduino("LUZ_COCHERA_ON");
-        if (btnLucesCochera) btnLucesCochera->setText("Luces: Apagadas");
-    } else {
-        enviarComandoArduino("LUZ_COCHERA_OFF");
-        if (btnLucesCochera) btnLucesCochera->setText("Luces: Encendidas");
-    }
-}
+// Implementaciones vacías para métodos faltantes
+void VentanaControl::mostrarMenuPatio() {}
+void VentanaControl::mostrarMenuBano() {}
+void VentanaControl::mostrarMenuPasillo() {}
+void VentanaControl::manejarBotonPuertaCochera() {}
+void VentanaControl::manejarBotonTvHabitacion1() {}
+void VentanaControl::manejarBotonTvHabitacion2() {}
+void VentanaControl::manejarBotonPersianaHabitacion1() {}
+void VentanaControl::manejarBotonPersianaHabitacion2() {}
+void VentanaControl::manejarBotonVentanaHabitacion1() {}
+void VentanaControl::manejarBotonVentanaHabitacion2() {}
+void VentanaControl::manejarBotonRiegoPatio() {}
+void VentanaControl::manejarBotonLucesCochera() {}
 
 void VentanaControl::actualizarEstadoVentana(const QString &habitacion, bool abierta) {
     if (habitacion == "HAB1") {

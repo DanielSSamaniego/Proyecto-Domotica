@@ -107,8 +107,6 @@ private:
     QPushButton *btnAutoClimaHabitacion2 = nullptr;
     void mostrarMenuHabitacion1();
     void mostrarMenuHabitacion2();
-    void mostrarMenuCochera();
-    void mostrarMenuPatio();
 };
 
 #endif // VENTANA_CONTROL_HPP
