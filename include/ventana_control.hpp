@@ -11,7 +11,7 @@
 #include <QString>
 #include <QTimer>
 #include <QObject>
-#include <QSerialPort> // <-- Agregado para comunicación serial
+#include "arduino.hpp"
 #include "actuadores.hpp"
 #include <vector>
 #include <memory>
@@ -20,7 +20,7 @@
 class VentanaControl : public QWidget {
     Q_OBJECT
 public:
-    explicit VentanaControl(const std::vector<std::shared_ptr<Actuador>>& dispositivos, QWidget *parent = nullptr);
+    explicit VentanaControl(const std::vector<std::shared_ptr<Actuador>>& dispositivos, Arduino* arduino, QWidget *parent = nullptr);
     ~VentanaControl();
 
 signals:
@@ -56,6 +56,9 @@ private slots:
     void manejarBotonClimaHabitacion2();
     void manejarBotonAutoClimaHabitacion1();
     void manejarBotonAutoClimaHabitacion2();
+    void mostrarMenuOpciones();
+    void mostrarPlaceholder(const QString& nombre);
+    void resizeEvent(QResizeEvent*) override;
 
 private:
     std::vector<QCheckBox*> checkboxes;
@@ -67,14 +70,14 @@ private:
     QTimer *timerCambioFondo;
     QGridLayout *menuCuadriculaLayout = nullptr;
     std::vector<QPushButton*> botonesMenu;
-    QSerialPort *serial; // <-- Miembro para comunicación serial
+    Arduino* arduino; // Reemplaza QSerialPort *serial
     void agregarBotonImagen(const QString &ruta, int fila, int columna, const QString &tooltip);
     void aplicarEstilosBotones(); // Método para aplicar estilos visuales de efecto presionado a los botones
     void configurarLayout();
     void actualizarFondoPorHora();
     void mostrarMenuPrincipal();
     void cambiarFondo(const QString &ruta, bool blur = false); // Actualizada para aceptar el parámetro blur
-    void enviarComandoArduino(const QString &comando); // <-- Método para enviar comandos
+    void enviarComandoArduino(const QString &comando);
     bool ventanaHabitacion1Abierta = false;
     bool ventanaHabitacion2Abierta = false;
     QPushButton *btnVentanaHabitacion1 = nullptr;
@@ -107,6 +110,8 @@ private:
     QPushButton *btnAutoClimaHabitacion2 = nullptr;
     void mostrarMenuHabitacion1();
     void mostrarMenuHabitacion2();
+    void mostrarMenuJardin();
+    void mostrarMenuEscalera();
 };
 
 #endif // VENTANA_CONTROL_HPP

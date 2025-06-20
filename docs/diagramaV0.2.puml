@@ -1,0 +1,39 @@
+@startuml
+' Diagrama de clases simplificado para la app domótica
+
+class VentanaControl {
+  +mostrarMenuOpciones()
+  +mostrarMenuCuadricula()
+  +mostrarMenuSala()
+  +mostrarMenuCocina()
+  +mostrarMenuComedor()
+  +mostrarMenuHabitacion()
+  +mostrarMenuBano()
+  +mostrarMenuPasillo()
+  +mostrarMenuPatio()
+  +mostrarMenuCochera()
+  +mostrarMenuJardin()
+  +mostrarMenuEscalera()
+  +enviarComandoArduino(comando)
+  +recibirDatosArduino()
+  ...
+}
+
+class Actuador {
+  +nombre: string
+  +estado: bool
+  +activar()
+  +desactivar()
+}
+
+VentanaControl "1" *-- "*" Actuador : dispositivos
+
+class Arduino {
+  +puerto: string
+  +enviarComando(comando)
+  +recibirDatos()
+}
+
+VentanaControl ..> Arduino : comunicación serial
+
+@enduml

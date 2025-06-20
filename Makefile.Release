@@ -267,9 +267,7 @@ release/moc_ventana_control.cpp: include/ventana_control.hpp \
 		C:/msys64/mingw64/include/QtCore/qtimer.h \
 		C:/msys64/mingw64/include/QtCore/qbasictimer.h \
 		C:/msys64/mingw64/include/QtCore/QObject \
-		C:/msys64/mingw64/include/QtSerialPort/QSerialPort \
-		C:/msys64/mingw64/include/QtSerialPort/qserialport.h \
-		C:/msys64/mingw64/include/QtSerialPort/qserialportglobal.h \
+		include/arduino.hpp \
 		include/actuadores.hpp \
 		release/moc_predefs.h \
 		C:/msys64/mingw64/bin/moc.exe
@@ -455,9 +453,7 @@ release/main.o: src/main.cpp C:/msys64/mingw64/include/QtWidgets/QApplication \
 		C:/msys64/mingw64/include/QtCore/qtimer.h \
 		C:/msys64/mingw64/include/QtCore/qbasictimer.h \
 		C:/msys64/mingw64/include/QtCore/QObject \
-		C:/msys64/mingw64/include/QtSerialPort/QSerialPort \
-		C:/msys64/mingw64/include/QtSerialPort/qserialport.h \
-		C:/msys64/mingw64/include/QtSerialPort/qserialportglobal.h \
+		include/arduino.hpp \
 		include/actuadores.hpp \
 		C:/msys64/mingw64/include/QtCore/QDebug
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release/main.o src/main.cpp
@@ -617,9 +613,7 @@ release/ventana_control.o: src/ventana_control.cpp include/ventana_control.hpp \
 		C:/msys64/mingw64/include/QtCore/qtimer.h \
 		C:/msys64/mingw64/include/QtCore/qbasictimer.h \
 		C:/msys64/mingw64/include/QtCore/QObject \
-		C:/msys64/mingw64/include/QtSerialPort/QSerialPort \
-		C:/msys64/mingw64/include/QtSerialPort/qserialport.h \
-		C:/msys64/mingw64/include/QtSerialPort/qserialportglobal.h \
+		include/arduino.hpp \
 		include/actuadores.hpp \
 		C:/msys64/mingw64/include/QtCore/QDebug \
 		C:/msys64/mingw64/include/QtWidgets/QApplication \
@@ -637,10 +631,15 @@ release/ventana_control.o: src/ventana_control.cpp include/ventana_control.hpp \
 		C:/msys64/mingw64/include/QtCore/QSizeF \
 		C:/msys64/mingw64/include/QtGui/QTransform \
 		C:/msys64/mingw64/include/QtSerialPort/QSerialPortInfo \
-		C:/msys64/mingw64/include/QtSerialPort/qserialportinfo.h
+		C:/msys64/mingw64/include/QtSerialPort/qserialportinfo.h \
+		C:/msys64/mingw64/include/QtSerialPort/qserialportglobal.h \
+		C:/msys64/mingw64/include/QtWidgets/QHBoxLayout \
+		C:/msys64/mingw64/include/QtWidgets/QMessageBox \
+		C:/msys64/mingw64/include/QtWidgets/qmessagebox.h \
+		C:/msys64/mingw64/include/QtWidgets/qdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release/ventana_control.o src/ventana_control.cpp
 
-release/usuario.o: src/usuario.cpp 
+release/usuario.o: src/usuario.cpp include/usuario.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release/usuario.o src/usuario.cpp
 
 release/moc_ventana_control.o: release/moc_ventana_control.cpp 

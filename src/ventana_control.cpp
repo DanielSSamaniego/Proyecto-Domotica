@@ -3,53 +3,102 @@
 #include <QApplication>
 #include <QScreen>
 #include <QSerialPortInfo>
+#include <QHBoxLayout>
+#include <QMessageBox>
 
 VentanaControl::VentanaControl(const std::vector<std::shared_ptr<Actuador>>& dispositivos, QWidget *parent)
     : QWidget(parent), dispositivos(dispositivos) {
-    // Quitar bordes y barra de título para efecto de juego
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
-    // Opcional: establecer fondo negro por defecto
-    setStyleSheet("background-color: black;");
-    // Inicializar comunicación serial
-    serial = new QSerialPort(this);
-    // Cambia el nombre del puerto según tu sistema (ejemplo: /dev/ttyACM0)
-    serial->setPortName("/dev/ttyACM0");
-    serial->setBaudRate(QSerialPort::Baud9600);
-    serial->setDataBits(QSerialPort::Data8);
-    serial->setParity(QSerialPort::NoParity);
-    serial->setStopBits(QSerialPort::OneStop);
-    serial->setFlowControl(QSerialPort::NoFlowControl);
-    if (!serial->open(QIODevice::ReadWrite)) {
-        qDebug() << "No se pudo abrir el puerto serial";
-    } else {
-        connect(serial, &QSerialPort::readyRead, this, &VentanaControl::recibirDatosArduino);
+    setWindowTitle("Domótica - Menú Principal");
+    setMinimumSize(1024, 600);
+    fondoLabel = new QLabel(this);
+    fondoLabel->setScaledContents(true);
+    QPixmap fondoPixmap("docs/images/background/Menu Start.jpg");
+    fondoLabel->setPixmap(fondoPixmap);
+    fondoLabel->setGeometry(this->rect());
+    fondoLabel->lower();
+
+    botonHome = new QPushButton(this);
+    QPixmap homePixmap("docs/images/icons/boton Home.png");
+    botonHome->setIcon(QIcon(homePixmap));
+    botonHome->setIconSize(QSize(150, 150));
+    botonHome->setGeometry(50, 400, 150, 150);
+    botonHome->setStyleSheet("background: transparent; border: none;");
+    connect(botonHome, &QPushButton::clicked, this, &VentanaControl::mostrarMenuOpciones);
+}
+
+void VentanaControl::resizeEvent(QResizeEvent*) {
+    if (fondoLabel) fondoLabel->setGeometry(this->rect());
+}
+
+void VentanaControl::mostrarMenuOpciones() {
+    // Cambia el fondo
+    QPixmap fondo2("docs/images/background/Menu 2.jpg");
+    fondoLabel->setPixmap(fondo2);
+    // Oculta el botón HOME
+    botonHome->hide();
+    // Limpia botones anteriores
+    for (auto btn : botonesMenu) { btn->deleteLater(); }
+    botonesMenu.clear();
+    // Nombres y posiciones de los botones
+    struct BotonInfo { QString nombre; int x; int y; };
+    std::vector<BotonInfo> botones = {
+        {"jardin", 100, 100}, {"cochera", 250, 100}, {"sala", 400, 100},
+        {"cocina", 550, 100}, {"comedor", 700, 100}, {"escalera", 100, 300},
+        {"habitacion", 250, 300}, {"baño", 400, 300}, {"pasillo", 550, 300},
+        {"patio", 700, 300}, {"regresar", 400, 500}
+    };
+    for (const auto& info : botones) {
+        QPushButton* btn = new QPushButton(info.nombre, this);
+        btn->setGeometry(info.x, info.y, 120, 60);
+        btn->setStyleSheet(R"(
+            QPushButton {
+                font-size:18px;
+                background:#fff7;
+                border-radius:10px;
+                border:2px solid #aaa;
+                transition: background 0.2s;
+            }
+            QPushButton:pressed {
+                background: #cce6ff;
+                border:2px solid #3399ff;
+            }
+        )");
+        connect(btn, &QPushButton::clicked, [this, nombre=info.nombre]() {
+            if (nombre == "regresar") {
+                this->mostrarMenuPrincipal();
+            } else {
+                this->mostrarPlaceholder(nombre);
+            }
+        });
+        btn->show();
+        botonesMenu.push_back(btn);
     }
-    // Menú cuadriculado de habitaciones
-    gridLayout = new QGridLayout(this);
-    setLayout(gridLayout);
-    // Botones de ejemplo para cada área
-    QPushButton *btnSala = new QPushButton("Sala");
-    QPushButton *btnCocina = new QPushButton("Cocina");
-    QPushButton *btnComedor = new QPushButton("Comedor");
-    QPushButton *btnHabitacion = new QPushButton("Habitación");
-    QPushButton *btnBano = new QPushButton("Baño");
-    QPushButton *btnCochera = new QPushButton("Cochera");
-    QPushButton *btnPatio = new QPushButton("Patio");
-    gridLayout->addWidget(btnSala, 0, 0);
-    gridLayout->addWidget(btnCocina, 0, 1);
-    gridLayout->addWidget(btnComedor, 0, 2);
-    gridLayout->addWidget(btnHabitacion, 1, 0);
-    gridLayout->addWidget(btnBano, 1, 1);
-    gridLayout->addWidget(btnCochera, 1, 2);
-    gridLayout->addWidget(btnPatio, 2, 1);
-    // Conectar botones a slots que muestran menú contextual
-    connect(btnSala, &QPushButton::clicked, this, &VentanaControl::mostrarMenuSala);
-    connect(btnCocina, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCocina);
-    connect(btnComedor, &QPushButton::clicked, this, &VentanaControl::mostrarMenuComedor);
-    connect(btnHabitacion, &QPushButton::clicked, this, &VentanaControl::mostrarMenuHabitacion);
-    connect(btnBano, &QPushButton::clicked, this, &VentanaControl::mostrarMenuBano);
-    connect(btnCochera, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCochera);
-    connect(btnPatio, &QPushButton::clicked, this, &VentanaControl::mostrarMenuPatio);
+}
+
+void VentanaControl::mostrarMenuPrincipal() {
+    QPixmap fondoPixmap("docs/images/background/Menu Start.jpg");
+    fondoLabel->setPixmap(fondoPixmap);
+    for (auto btn : botonesMenu) { btn->deleteLater(); }
+    botonesMenu.clear();
+    botonHome->show();
+}
+
+void VentanaControl::mostrarPlaceholder(const QString& nombre) {
+    for (auto btn : botonesMenu) { btn->hide(); }
+    QLabel* label = new QLabel("Menú de " + nombre + " (en construcción)", this);
+    label->setAlignment(Qt::AlignCenter);
+    label->setGeometry(200, 200, 400, 100);
+    label->setStyleSheet("font-size:22px;color:#333;background:#fff7;border-radius:10px;");
+    label->show();
+    QPushButton* btnRegresar = new QPushButton("Regresar", this);
+    btnRegresar->setGeometry(350, 350, 120, 60);
+    btnRegresar->setStyleSheet("font-size:18px;background:#fff7;border-radius:10px;");
+    connect(btnRegresar, &QPushButton::clicked, [this, label, btnRegresar]() {
+        label->deleteLater();
+        btnRegresar->deleteLater();
+        this->mostrarMenuOpciones();
+    });
+    btnRegresar->show();
 }
 
 VentanaControl::~VentanaControl() {
@@ -102,6 +151,9 @@ void VentanaControl::mostrarMenuCuadricula() {
     QPushButton *btnBano = new QPushButton("Baño");
     QPushButton *btnCochera = new QPushButton("Cochera");
     QPushButton *btnPatio = new QPushButton("Patio");
+    QPushButton *btnPasillo = new QPushButton("Pasillo");
+    QPushButton *btnJardin = new QPushButton("Jardín");
+    QPushButton *btnEscalera = new QPushButton("Escalera");
     gridLayout->addWidget(btnSala, 0, 0);
     gridLayout->addWidget(btnCocina, 0, 1);
     gridLayout->addWidget(btnComedor, 0, 2);
@@ -109,6 +161,9 @@ void VentanaControl::mostrarMenuCuadricula() {
     gridLayout->addWidget(btnBano, 1, 1);
     gridLayout->addWidget(btnCochera, 1, 2);
     gridLayout->addWidget(btnPatio, 2, 1);
+    gridLayout->addWidget(btnPasillo, 2, 0);
+    gridLayout->addWidget(btnJardin, 2, 2);
+    gridLayout->addWidget(btnEscalera, 1, 3);
     connect(btnSala, &QPushButton::clicked, this, &VentanaControl::mostrarMenuSala);
     connect(btnCocina, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCocina);
     connect(btnComedor, &QPushButton::clicked, this, &VentanaControl::mostrarMenuComedor);
@@ -116,6 +171,10 @@ void VentanaControl::mostrarMenuCuadricula() {
     connect(btnBano, &QPushButton::clicked, this, &VentanaControl::mostrarMenuBano);
     connect(btnCochera, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCochera);
     connect(btnPatio, &QPushButton::clicked, this, &VentanaControl::mostrarMenuPatio);
+    connect(btnBano, &QPushButton::clicked, this, &VentanaControl::mostrarMenuBano);
+    connect(btnPasillo, &QPushButton::clicked, this, &VentanaControl::mostrarMenuPasillo);
+    connect(btnJardin, &QPushButton::clicked, this, &VentanaControl::mostrarMenuJardin);
+    connect(btnEscalera, &QPushButton::clicked, this, &VentanaControl::mostrarMenuEscalera);
 }
 
 void VentanaControl::mostrarMenuSala() {
@@ -389,19 +448,186 @@ void VentanaControl::mostrarMenuCochera() {
     connect(btnRegresar, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCuadricula);
 }
 
-// Implementaciones vacías para métodos faltantes
-void VentanaControl::mostrarMenuPatio() {}
-void VentanaControl::mostrarMenuBano() {}
-void VentanaControl::mostrarMenuPasillo() {}
-void VentanaControl::manejarBotonPuertaCochera() {}
-void VentanaControl::manejarBotonTvHabitacion1() {}
-void VentanaControl::manejarBotonTvHabitacion2() {}
-void VentanaControl::manejarBotonPersianaHabitacion1() {}
-void VentanaControl::manejarBotonPersianaHabitacion2() {}
-void VentanaControl::manejarBotonVentanaHabitacion1() {}
-void VentanaControl::manejarBotonVentanaHabitacion2() {}
-void VentanaControl::manejarBotonRiegoPatio() {}
-void VentanaControl::manejarBotonLucesCochera() {}
+void VentanaControl::mostrarMenuPatio() {
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+    QPushButton *btnLuces = new QPushButton("Luces Patio: Encender");
+    QPushButton *btnRiego = new QPushButton("Riego: Activar");
+    QPushButton *btnRegresar = new QPushButton("Regresar");
+    gridLayout->addWidget(btnLuces, 0, 0);
+    gridLayout->addWidget(btnRiego, 1, 0);
+    gridLayout->addWidget(btnRegresar, 2, 0);
+    static bool luzEncendida = false;
+    static bool riegoActivo = false;
+    connect(btnLuces, &QPushButton::clicked, [this, btnLuces]() mutable {
+        luzEncendida = !luzEncendida;
+        if (luzEncendida) {
+            enviarComandoArduino("LUZ_PATIO_ON");
+            btnLuces->setText("Luces Patio: Apagar");
+        } else {
+            enviarComandoArduino("LUZ_PATIO_OFF");
+            btnLuces->setText("Luces Patio: Encender");
+        }
+    });
+    connect(btnRiego, &QPushButton::clicked, [this, btnRiego]() mutable {
+        riegoActivo = !riegoActivo;
+        if (riegoActivo) {
+            enviarComandoArduino("RIEGO_PATIO_ON");
+            btnRiego->setText("Riego: Desactivar");
+        } else {
+            enviarComandoArduino("RIEGO_PATIO_OFF");
+            btnRiego->setText("Riego: Activar");
+        }
+    });
+    connect(btnRegresar, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCuadricula);
+}
+
+void VentanaControl::mostrarMenuBano() {
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+    QPushButton *btnLuces = new QPushButton("Luces Baño: Encender");
+    QPushButton *btnExtractor = new QPushButton("Extractor: Encender");
+    QPushButton *btnRegresar = new QPushButton("Regresar");
+    gridLayout->addWidget(btnLuces, 0, 0);
+    gridLayout->addWidget(btnExtractor, 1, 0);
+    gridLayout->addWidget(btnRegresar, 2, 0);
+    static bool luzEncendida = false;
+    static bool extractorEncendido = false;
+    connect(btnLuces, &QPushButton::clicked, [this, btnLuces]() mutable {
+        luzEncendida = !luzEncendida;
+        if (luzEncendida) {
+            enviarComandoArduino("LUZ_BANO_ON");
+            btnLuces->setText("Luces Baño: Apagar");
+        } else {
+            enviarComandoArduino("LUZ_BANO_OFF");
+            btnLuces->setText("Luces Baño: Encender");
+        }
+    });
+    connect(btnExtractor, &QPushButton::clicked, [this, btnExtractor]() mutable {
+        extractorEncendido = !extractorEncendido;
+        if (extractorEncendido) {
+            enviarComandoArduino("EXTRACTOR_BANO_ON");
+            btnExtractor->setText("Extractor: Apagar");
+        } else {
+            enviarComandoArduino("EXTRACTOR_BANO_OFF");
+            btnExtractor->setText("Extractor: Encender");
+        }
+    });
+    connect(btnRegresar, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCuadricula);
+}
+
+void VentanaControl::mostrarMenuPasillo() {
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+    QPushButton *btnLuces = new QPushButton("Luces Pasillo: Encender");
+    QPushButton *btnRegresar = new QPushButton("Regresar");
+    gridLayout->addWidget(btnLuces, 0, 0);
+    gridLayout->addWidget(btnRegresar, 1, 0);
+    static bool luzEncendida = false;
+    connect(btnLuces, &QPushButton::clicked, [this, btnLuces]() mutable {
+        luzEncendida = !luzEncendida;
+        if (luzEncendida) {
+            enviarComandoArduino("LUZ_PASILLO_ON");
+            btnLuces->setText("Luces Pasillo: Apagar");
+        } else {
+            enviarComandoArduino("LUZ_PASILLO_OFF");
+            btnLuces->setText("Luces Pasillo: Encender");
+        }
+    });
+    connect(btnRegresar, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCuadricula);
+}
+
+void VentanaControl::mostrarMenuJardin() {
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+    QPushButton *btnLuces = new QPushButton("Luces Jardín: Encender");
+    QPushButton *btnRiego = new QPushButton("Riego: Activar");
+    QPushButton *btnRegresar = new QPushButton("Regresar");
+    gridLayout->addWidget(btnLuces, 0, 0);
+    gridLayout->addWidget(btnRiego, 1, 0);
+    gridLayout->addWidget(btnRegresar, 2, 0);
+    static bool luzEncendida = false;
+    static bool riegoActivo = false;
+    connect(btnLuces, &QPushButton::clicked, [this, btnLuces]() mutable {
+        luzEncendida = !luzEncendida;
+        if (luzEncendida) {
+            enviarComandoArduino("LUZ_JARDIN_ON");
+            btnLuces->setText("Luces Jardín: Apagar");
+        } else {
+            enviarComandoArduino("LUZ_JARDIN_OFF");
+            btnLuces->setText("Luces Jardín: Encender");
+        }
+    });
+    connect(btnRiego, &QPushButton::clicked, [this, btnRiego]() mutable {
+        riegoActivo = !riegoActivo;
+        if (riegoActivo) {
+            enviarComandoArduino("RIEGO_JARDIN_ON");
+            btnRiego->setText("Riego: Desactivar");
+        } else {
+            enviarComandoArduino("RIEGO_JARDIN_OFF");
+            btnRiego->setText("Riego: Activar");
+        }
+    });
+    connect(btnRegresar, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCuadricula);
+}
+
+void VentanaControl::mostrarMenuEscalera() {
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+    QPushButton *btnLuces = new QPushButton("Luces Escalera: Encender");
+    QPushButton *btnRegresar = new QPushButton("Regresar");
+    gridLayout->addWidget(btnLuces, 0, 0);
+    gridLayout->addWidget(btnRegresar, 1, 0);
+    static bool luzEncendida = false;
+    connect(btnLuces, &QPushButton::clicked, [this, btnLuces]() mutable {
+        luzEncendida = !luzEncendida;
+        if (luzEncendida) {
+            enviarComandoArduino("LUZ_ESCALERA_ON");
+            btnLuces->setText("Luces Escalera: Apagar");
+        } else {
+            enviarComandoArduino("LUZ_ESCALERA_OFF");
+            btnLuces->setText("Luces Escalera: Encender");
+        }
+    });
+    connect(btnRegresar, &QPushButton::clicked, this, &VentanaControl::mostrarMenuCuadricula);
+}
+
+void VentanaControl::manejarBotonPuertaCochera() {
+    puertaCocheraAbierta = !puertaCocheraAbierta;
+    if (puertaCocheraAbierta) {
+        enviarComandoArduino("PUERTA_COCHERA_ABRIR");
+        if (btnPuertaCochera) btnPuertaCochera->setText("Cerrar Puerta");
+    } else {
+        enviarComandoArduino("PUERTA_COCHERA_CERRAR");
+        if (btnPuertaCochera) btnPuertaCochera->setText("Abrir Puerta");
+    }
+}
+
+void VentanaControl::manejarBotonLucesCochera() {
+    lucesCocheraEncendidas = !lucesCocheraEncendidas;
+    if (lucesCocheraEncendidas) {
+        enviarComandoArduino("LUZ_COCHERA_ON");
+        if (btnLucesCochera) btnLucesCochera->setText("Luces: Apagadas");
+    } else {
+        enviarComandoArduino("LUZ_COCHERA_OFF");
+        if (btnLucesCochera) btnLucesCochera->setText("Luces: Encendidas");
+    }
+}
 
 void VentanaControl::actualizarEstadoVentana(const QString &habitacion, bool abierta) {
     if (habitacion == "HAB1") {
@@ -435,10 +661,6 @@ void VentanaControl::configurarLayout() {
 }
 
 void VentanaControl::actualizarFondoPorHora() {
-    // Implementación vacía
-}
-
-void VentanaControl::mostrarMenuPrincipal() {
     // Implementación vacía
 }
 
